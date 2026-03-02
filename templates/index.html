@@ -13,6 +13,12 @@
             padding: 20px;
         }
 
+        input[name="nombre"] {
+            padding: 5px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
         button {
             display: flex;
             align-items: center;
@@ -26,9 +32,14 @@
             transition: all 0.2s;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background-color: #d0f0d0;
             transform: scale(1.05);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -36,15 +47,35 @@
 
 <h2>Elige tu número</h2>
 
+<form id="nombre-form">
+    <input type="text" name="nombre" placeholder="Tu nombre" required>
+</form>
+
 <div id="numeros-container">
+    {% set animales = ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯"] %}
     {% for numero in range(1, 101) %}
-        <button>
-            {{ numero }} 
-            {% set animales = ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯"] %}
-            {{ animales[(numero-1) % 10] }}
-        </button>
+        <form method="POST" action="/pick" style="display:inline;">
+            <input type="hidden" name="numero" value="{{ numero }}">
+            <input type="hidden" name="nombre" value="">
+            <button type="submit" {% if numero|string in numeros %}disabled{% endif %}>
+                {{ numero }} {{ animales[(numero-1) % 10] }}
+            </button>
+        </form>
     {% endfor %}
 </div>
+
+<script>
+    // Poner el nombre del jugador en cada formulario antes de enviar
+    const nombreInput = document.querySelector('input[name="nombre"]');
+    const forms = document.querySelectorAll('#numeros-container form');
+
+    forms.forEach(form => {
+        form.addEventListener('submit', e => {
+            const hidden = form.querySelector('input[name="nombre"]');
+            hidden.value = nombreInput.value || "Jugador";
+        });
+    });
+</script>
 
 </body>
 </html>
