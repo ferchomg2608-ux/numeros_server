@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>100 Números</title>
+    <style>
+        button {
+            width: 60px;
+            height: 60px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        .taken {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>Hola {{ name }}, escoge un número</h2>
+
+    {% for i in range(1, 101) %}
+        {% if i|string in taken %}
+            <button class="taken" disabled>
+                {{ i }} ({{ taken[i|string] }})
+            </button>
+        {% else %}
+            <a href="/pick/{{ i }}?name={{ name }}">
+                <button>{{ i }}</button>
+            </a>
+        {% endif %}
+        {% if i % 10 == 0 %}
+            <br>
+        {% endif %}
+    {% endfor %}
+</body>
+</html>
