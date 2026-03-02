@@ -13,7 +13,7 @@
             padding: 20px;
         }
 
-        input[name="nombre"] {
+        input[name="nombre"], input[name="password"] {
             padding: 5px;
             font-size: 16px;
             margin-bottom: 15px;
@@ -47,8 +47,15 @@
 
 <h2>Elige tu número</h2>
 
+<!-- Nombre del jugador -->
 <form id="nombre-form">
     <input type="text" name="nombre" placeholder="Tu nombre" required>
+</form>
+
+<!-- Reinicio solo admin -->
+<form method="POST" action="/reset" style="margin-bottom: 20px;">
+    <input type="password" name="password" placeholder="Contraseña admin">
+    <button type="submit" style="background-color: #ffaaaa;">🔄 Reiniciar juego</button>
 </form>
 
 <div id="numeros-container">
