@@ -8,6 +8,12 @@
             font-family: Arial, sans-serif;
             padding: 20px;
             min-height: 100vh;
+
+            /* Fondo de selva */
+            background-image: url("/static/selva.png");
+            background-size: cover;       /* Ajusta la imagen a toda la pantalla */
+            background-position: center;  /* Centrar la imagen */
+            background-repeat: no-repeat;
         }
 
         input[name="nombre"], input[name="password"] {
@@ -16,13 +22,15 @@
             margin-bottom: 15px;
         }
 
+        /* Grid de 10x10 */
         #numeros-container {
             display: grid;
-            grid-template-columns: repeat(10, 1fr); /* 10 columnas */
+            grid-template-columns: repeat(10, 1fr);
             gap: 10px;
             justify-items: center;
         }
 
+        /* Botones semi-translúcidos para resaltar sobre la selva */
         #numeros-container button {
             display: flex;
             align-items: center;
@@ -68,10 +76,12 @@
     {% for numero in range(1, 101) %}
         {% set numero_str = numero|string %}
         {% if numero_str in numeros %}
+            <!-- Número bloqueado con nombre del jugador -->
             <button disabled>
                 {{ numero }} {{ animales[(numero-1) % 10] }} - {{ numeros[numero_str] }}
             </button>
         {% else %}
+            <!-- Número disponible -->
             <form method="POST" action="/pick">
                 <input type="hidden" name="numero" value="{{ numero }}">
                 <input type="hidden" name="nombre" value="">
@@ -98,5 +108,3 @@
 
 </body>
 </html>
-
-
