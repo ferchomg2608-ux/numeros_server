@@ -211,13 +211,23 @@ const forms = document.querySelectorAll('#numeros-container form')
 const sonido = document.getElementById("sonido")
 
 forms.forEach(f=>{
-    f.addEventListener('submit',()=>{
-        f.querySelector('input[name="nombre"]').value =
-        nombreInput.value || "Jugador"
+    f.addEventListener('submit',(e)=>{
+
+        let nombre = nombreInput.value.trim()
+
+        if(nombre === ""){
+            alert("⚠️ Debes escribir tu nombre antes de elegir un número")
+            e.preventDefault()
+            return
+        }
+
+        f.querySelector('input[name="nombre"]').value = nombre
 
         sonido.play()
     })
 })
+
+</script>
 
 </script>
 
