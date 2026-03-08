@@ -1,11 +1,23 @@
 <!DOCTYPE html>
-
 <html lang="es">
+
 <head>
 <meta charset="UTF-8">
 <title>Safari de Números</title>
 
 <style>
+
+/* BODY */
+
+body{
+    font-family: Arial, sans-serif;
+    padding:20px;
+    min-height:100vh;
+
+    background-image:url("{{ url_for('static', filename='selva.png') }}");
+    background-size:cover;
+    background-position:center;
+}
 
 /* HEADER */
 
@@ -36,16 +48,6 @@
     text-decoration:underline;
 }
 
-body{
-    font-family: Arial, sans-serif;
-    padding:20px;
-    min-height:100vh;
-
-    background-image:url("{{ url_for('static', filename='selva.png') }}");
-    background-size:cover;
-    background-position:center;
-}
-
 h2{
     color:white;
     text-shadow:2px 2px 5px black;
@@ -55,6 +57,74 @@ h3{
     color:white;
     text-shadow:2px 2px 4px black;
 }
+
+/* GRID */
+
+#numeros-container{
+    display:grid;
+    grid-template-columns:repeat(10,1fr);
+    gap:12px;
+}
+
+/* TARJETAS */
+
+.tarjeta{
+    padding:12px;
+    border-radius:16px;
+    border:2px solid #2f5d2f;
+
+    background:rgba(255,255,255,0.9);
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    font-size:18px;
+    font-weight:bold;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.3);
+
+    transition:all .25s;
+}
+
+/* EFECTO */
+
+.tarjeta:hover{
+    transform:scale(1.07);
+    background:#e8ffe8;
+}
+
+/* NUMERO TOMADO */
+
+.tomado{
+    background:rgba(180,180,180,.8);
+    border-color:#555;
+}
+
+/* BOTON */
+
+.tarjeta button{
+    border:none;
+    background:none;
+    font-size:18px;
+    cursor:pointer;
+}
+
+/* NOMBRE */
+
+.jugador{
+    font-size:13px;
+    margin-top:4px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER -->
 
 <div class="header">
 
@@ -70,64 +140,6 @@ h3{
 </div>
 
 </div>
-
-/* GRID */
-#numeros-container{
-    display:grid;
-    grid-template-columns:repeat(10,1fr);
-    gap:12px;
-}
-
-/* TARJETAS */
-.tarjeta{
-    padding:12px;
-    border-radius:14px;
-    border:2px solid #2f5d2f;
-
-    background:rgba(255,255,255,0.85);
-
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-
-    font-size:18px;
-    font-weight:bold;
-
-    transition:all .25s;
-}
-
-/* EFECTO HOVER */
-.tarjeta:hover{
-    transform:scale(1.07);
-    background:#e8ffe8;
-}
-
-/* CUANDO YA ESTA TOMADO */
-.tomado{
-    background:rgba(180,180,180,.8);
-    border-color:#555;
-}
-
-/* BOTON INTERNO */
-.tarjeta button{
-    border:none;
-    background:none;
-    font-size:18px;
-    cursor:pointer;
-}
-
-/* NOMBRE JUGADOR */
-.jugador{
-    font-size:13px;
-    margin-top:4px;
-}
-
-</style>
-
-</head>
-
-<body>
 
 <h2>🌿 Safari de Números 🐅</h2>
 
@@ -149,16 +161,16 @@ h3{
 <div id="numeros-container">
 
 {% set animales = [
-"🐐 Carnero","🐂 Toro","🐛 Ciempies","🦂 Alacran","🦁 Leon","🐸 Rana","🦜 Perico","🐁 Raton","🦅 Aguila","🐯 Tigre",
-"🐈 Gato","🐴 Caballo","🐒 Mono","🕊️ Paloma","🦊 Zorro","🐻 Oso","🦃 Pavo","🫏 Burro","🐐 Chivo","🐷 Cerdo","🐓 Gallo",
-"🐫 Camello","🦓 Cebra","🦎 Iguana","🐔 Gallina","🐄 Vaca","🐕 Perro","🐦‍⬛ Zamuro","🐘 Elefante","🐊 Caiman","🦫 Lapa","🐿️ Ardilla","🐟 Pescado",
-"🦌 Venado","🦒 Jirafa","🐍 Culebra","🐢 Tortuga","🐃 Búfalo","🦉 Lechuza","🐝 Avispa","🦘 Canguro","🐦 Tucan","🦋 Mariposa",
-"🦡 Chiguire","🦩 Garza","🐆 Puma","🦚 Pavo Real","🦔 Puercoespin","🦥 Perezoso","🐥 Canario","🦤 Pelicano ","🐙 Pulpo","🐌 Caracol",
-"🦗 Grillo","🦡 Oso Perezoso","🦈 Tiburon","🦆 Pato","🐜 hormiga","🐆 Pantera","🦎 Camaleon","🐼 Panda","🦡 Cachicamo","🦀 Cangrejo",
-"🦅 Gavilan","🕷 Araña","🐺 Lobo","🦩 Avestruz","🐅 Jaguar","🐇 Conejo","🦬 Bisonte","🦜 Guacamaya","🦍 Gorila","🦛 Hipopotamo",
-"🐥 Turpial","🦜 Guacharo","🦏 Rinoceronte","🐧 Pingüino","🦌 Antilope","🦑 Calamar","🦇 Murcielago","🐦‍⬛ Cuervo","🪳 Cucaracha","🦉 Buho",
-"🦐 Camarón","🐹 Hamster","🐂 Buey","🐐 Cabra","🦔 Erizo De Mar","🐍 Anguila","🦦 Huron","🐢  Morrocoy","🦢 Cizne","🦤 Gaviota",
-"🕊️ Paujil","🪲 Escarabajo","🪳 Caballito de mar","🦜 Loro","🐊 Cocodrilo","🐋 Ballena","🐬 Delfin"
+"🐐 Carnero","🐂 Toro","🐛 Ciempiés","🦂 Alacrán","🦁 León","🐸 Rana","🦜 Perico","🐁 Ratón","🦅 Águila","🐯 Tigre",
+"🐈 Gato","🐴 Caballo","🐒 Mono","🕊️ Paloma","🦊 Zorro","🐻 Oso","🦃 Pavo","🫏 Burro","🐐 Chivo","🐷 Cerdo",
+"🐓 Gallo","🐫 Camello","🦓 Cebra","🦎 Iguana","🐔 Gallina","🐄 Vaca","🐕 Perro","🐦 Zamuro","🐘 Elefante","🐊 Caimán",
+"🦫 Lapa","🐿️ Ardilla","🐟 Pescado","🦌 Venado","🦒 Jirafa","🐍 Culebra","🐢 Tortuga","🐃 Búfalo","🦉 Lechuza","🐝 Avispa",
+"🦘 Canguro","🐦 Tucán","🦋 Mariposa","🦫 Chigüire","🦩 Garza","🐆 Puma","🦚 Pavo Real","🦔 Puercoespín","🦥 Perezoso","🐥 Canario",
+"🦤 Pelícano","🐙 Pulpo","🐌 Caracol","🦗 Grillo","🐻‍❄️ Oso Polar","🦈 Tiburón","🦆 Pato","🐜 Hormiga","🐆 Pantera","🦎 Camaleón",
+"🐼 Panda","🦡 Cachicamo","🦀 Cangrejo","🦅 Gavilán","🕷 Araña","🐺 Lobo","🦤 Avestruz","🐅 Jaguar","🐇 Conejo","🦬 Bisonte",
+"🦜 Guacamaya","🦍 Gorila","🦛 Hipopótamo","🐥 Turpial","🦜 Guácharo","🦏 Rinoceronte","🐧 Pingüino","🦌 Antílope","🦑 Calamar","🦇 Murciélago",
+"🐦 Cuervo","🪳 Cucaracha","🦉 Búho","🦐 Camarón","🐹 Hámster","🐂 Buey","🐐 Cabra","🦔 Erizo","🐍 Anguila","🦦 Nutria",
+"🐢 Morrocoy","🦢 Cisne","🕊️ Paujil","🪲 Escarabajo","🐠 Caballito de mar","🦜 Loro","🐊 Cocodrilo","🐋 Ballena","🐬 Delfín","🦭 Foca"
 ] %}
 
 {% for numero in range(1,101) %}
