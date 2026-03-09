@@ -124,6 +124,59 @@ h3{
 
 <body>
 
+{% if numeros|length == 100 %}
+
+<div style="
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+color:white;
+text-shadow:2px 2px 6px black;
+">
+
+<h1 style="font-size:70px;">🏆</h1>
+
+<h1>¡Safari Completo!</h1>
+
+<h2>🎉 Todos los números fueron vendidos 🎉</h2>
+
+<h3>Participantes:</h3>
+
+<div style="
+background:rgba(0,0,0,0.5);
+padding:20px;
+border-radius:10px;
+max-height:300px;
+overflow:auto;
+">
+
+{% for numero, jugador in numeros.items() %}
+<div>
+<strong>{{numero}}</strong> - {{jugador}}
+</div>
+{% endfor %}
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script>
+setTimeout(()=>{
+confetti({
+particleCount:200,
+spread:100,
+origin:{y:0.6}
+});
+},500)
+</script>
+
+{% else %}
+
 <!-- HEADER -->
 
 <div class="header">
@@ -228,6 +281,8 @@ forms.forEach(f=>{
 })
 
 </script>
+
+{% endif %}
 
 </body>
 </html>
