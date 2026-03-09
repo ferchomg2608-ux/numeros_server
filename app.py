@@ -1,15 +1,19 @@
 import json
 import random
+import os
 from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
-ADMIN_PASSWORD = "1234"  # Cambia la contraseña si quieres
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, "numeros.json")
+
+ADMIN_PASSWORD = "1235"  # Cambia la contraseña si quieres
 
 
 def cargar_numeros():
     try:
-        with open("numeros.json", "r") as f:
+        with open(DATA_FILE, "r") as f:
             return json.load(f)
     except:
         return {}
@@ -19,7 +23,7 @@ numeros = cargar_numeros()
 
 
 def guardar_numeros():
-    with open("numeros.json", "w") as f:
+    with open(DATA_FILE, "w") as f:
         json.dump(numeros, f)
 
 
