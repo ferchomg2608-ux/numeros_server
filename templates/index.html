@@ -7,6 +7,10 @@
 
 <style>
 
+html{
+scroll-behavior:smooth;
+}
+
 /* PROGRESO */
 
 #progreso-box{
@@ -44,13 +48,17 @@ body{
 /* HEADER */
 
 .header{
-    background:rgba(0,80,0,0.9);
-    padding:12px 25px;
-    border-radius:12px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+background:rgba(0,80,0,0.9);
+padding:12px 25px;
+border-radius:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+
+position:sticky;
+top:0;
+z-index:1000;
 }
 
 .logo{
@@ -146,6 +154,19 @@ h3{
 
 <body>
 
+<div class="header">
+
+<div class="logo">🦜 Safari de Números</div>
+
+<div class="menu">
+<a href="#resultados">Resultados</a>
+<a href="#premios">Premios</a>
+<a href="#reglas">Reglas</a>
+<a href="#contacto">Contacto</a>
+</div>
+
+</div>
+
 {% if numeros|length == 100 %}
 
 <div style="
@@ -200,21 +221,6 @@ origin:{y:0.6}
 {% else %}
 
 <!-- HEADER -->
-
-<div class="header">
-
-<div class="logo">
-🦜 Safari de Números
-</div>
-
-<div class="menu">
-<a href="#">Resultados</a>
-<a href="#">Premios</a>
-<a href="#">Reglas</a>
-<a href="#">Contacto</a>
-</div>
-
-</div>
 
 <h2>🌿 Safari de Números 🐅</h2>
 
@@ -356,7 +362,37 @@ tarjeta.classList.add("tomado")
 }
 
 setInterval(actualizarNumeros, 3000)
+
 </script>
+
+<section id="resultados">
+
+<h2>🏆 Resultados</h2>
+
+<p>Aquí aparecerán los ganadores del Safari.</p>
+
+</section>
+
+
+<section id="premios">
+
+<h2>🎁 Premios</h2>
+
+<p>🥇 Primer premio</p>
+<p>🥈 Segundo premio</p>
+<p>🥉 Tercer premio</p>
+
+</section>
+
+<section id="reglas">
+
+<h2>📜 Reglas</h2>
+
+<p>1. Cada número solo puede ser elegido una vez.</p>
+<p>2. El ganador se elige con la ruleta.</p>
+<p>3. El administrador controla el sorteo.</p>
+
+</section>
 
 </body>
 </html>
