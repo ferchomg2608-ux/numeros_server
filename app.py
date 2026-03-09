@@ -1,9 +1,11 @@
 import json
+import random
 from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
-ADMIN_PASSWORD = "1234"  # Cambia esto a la contraseña que quieras
+ADMIN_PASSWORD = "1234"  # Cambia la contraseña si quieres
+
 
 def cargar_numeros():
     try:
@@ -12,32 +14,71 @@ def cargar_numeros():
     except:
         return {}
 
+
 numeros = cargar_numeros()
+
 
 def guardar_numeros():
     with open("numeros.json", "w") as f:
         json.dump(numeros, f)
 
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html", numeros=numeros)
 
+
 @app.route("/pick", methods=["POST"])
 def pick():
+
     numero = int(request.form["numero"])
     nombre = request.form.get("nombre", "Jugador")
-    
+
     if str(numero) not in numeros:
         numeros[str(numero)] = nombre
         guardar_numeros()
-    
+
     return redirect("/")
 
-# NUEVO: Reiniciar juego con contraseña
+
 @app.route("/reset", methods=["POST"])
 def reset():
+
     password = request.form.get("password", "")
+
     if password == ADMIN_PASSWORD:
         numeros.clear()
         guardar_numeros()
+
     return redirect("/")
+
+
+# PANEL ADMIN
+@app.route("/admin", methods=["GET","POST"])
+def admin():
+
+    password = request.args.get("password","")
+
+    if password != ADMIN_PASSWORD:
+        return "Acceso denegado"
+
+    ganador = None
+
+    if request.method == "POST":
+
+        if request.form.get("accion") == "ganador":
+            if numeros:
+                numero = random.choice(list(numeros.keys()))
+                ganador = (numero, numeros[numero])
+
+        if request.form.get("accion") == "liberar":
+            numero = request.form.get("numero")
+            if numero in numeros:
+                del numeros[numero]
+                guardar_numeros()
+
+    return render_template("admin.html", numeros=numeros, ganador=ganador)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

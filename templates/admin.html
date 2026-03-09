@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Panel Admin</title>
+</head>
+
+<body>
+
+<h1>Panel Administrador</h1>
+
+<h2>Jugadores</h2>
+
+{% for numero, jugador in numeros.items() %}
+
+<div>
+{{numero}} - {{jugador}}
+
+<form method="POST" style="display:inline">
+<input type="hidden" name="accion" value="liberar">
+<input type="hidden" name="numero" value="{{numero}}">
+<button>❌ Liberar</button>
+</form>
+
+</div>
+
+{% endfor %}
+
+<hr>
+
+<h2>Elegir ganador</h2>
+
+<form method="POST">
+<input type="hidden" name="accion" value="ganador">
+<button>🏆 Elegir ganador</button>
+</form>
+
+{% if ganador %}
+
+<h1>
+🎉 Ganador: Número {{ganador[0]}} - {{ganador[1]}}
+</h1>
+
+{% endif %}
+
+</body>
+
+</html>
