@@ -2,12 +2,31 @@
 <html>
 
 <head>
+
+<script src="https://cdn.jsdelivr.net/npm/winwheel@2.8.0/Winwheel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
 <title>Panel Admin</title>
 </head>
 
 <body>
 
 <h1>Panel Administrador</h1>
+
+<h2>🎡 Ruleta del ganador</h2>
+
+<div id="ruleta-box">
+
+<canvas id="ruleta" width="500" height="500"></canvas>
+
+<br>
+
+<button onclick="girar()">🎰 Girar ruleta</button>
+<button onclick="pantallaCompleta()">🖥 Pantalla completa</button>
+
+<h2 id="resultado"></h2>
+
+</div>
 
 <h2>Jugadores</h2>
 
@@ -42,6 +61,52 @@
 </h1>
 
 {% endif %}
+
+<script>
+
+let jugadores = [
+{% for numero, jugador in numeros.items() %}
+{ text: "{{numero}} - {{jugador}}" },
+{% endfor %}
+]
+
+if(jugadores.length === 0){
+jugadores = [{text:"Sin jugadores"}]
+}
+
+let rueda = new Winwheel({
+numSegments: jugadores.length,
+outerRadius: 200,
+textFontSize: 14,
+segments: jugadores,
+animation:{
+type:"spinToStop",
+duration:6,
+spins:8,
+callbackFinished:mostrarGanador
+}
+})
+
+function girar(){
+rueda.startAnimation()
+}
+
+function mostrarGanador(segmento){
+document.getElementById("resultado").innerHTML =
+"🏆 GANADOR: " + segmento.text
+}
+
+function pantallaCompleta(){
+
+let elem = document.getElementById("ruleta-box")
+
+if(elem.requestFullscreen){
+elem.requestFullscreen()
+}
+
+}
+
+</script>
 
 </body>
 
