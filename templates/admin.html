@@ -1,14 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
 
 <meta charset="UTF-8">
 <title>Panel Administrador</title>
-
-<script src="https://cdn.jsdelivr.net/npm/winwheel@2.8.0/dist/Winwheel.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
@@ -33,7 +28,7 @@ border-radius:6px;
 }
 
 button{
-padding:10px 15px;
+padding:12px 18px;
 margin:8px;
 font-size:16px;
 cursor:pointer;
@@ -41,13 +36,14 @@ border-radius:8px;
 border:none;
 }
 
-#ruleta{
-display:block;
-margin:auto;
+canvas{
+background:#111;
+border-radius:50%;
+margin-top:20px;
 }
 
 #resultado{
-font-size:28px;
+font-size:32px;
 margin-top:20px;
 color:yellow;
 }
@@ -86,8 +82,6 @@ color:yellow;
 
 <h2>🎡 Ruleta del ganador</h2>
 
-<div id="ruleta-box">
-
 <canvas id="ruleta" width="500" height="500"></canvas>
 
 <br>
@@ -96,8 +90,6 @@ color:yellow;
 <button onclick="pantallaCompleta()">🖥 Pantalla completa</button>
 
 <h2 id="resultado"></h2>
-
-</div>
 
 <hr>
 
@@ -108,50 +100,115 @@ color:yellow;
 
 <script>
 
+const canvas = document.getElementById("ruleta")
+const ctx = canvas.getContext("2d")
+
 let jugadores = [
 {% for numero, jugador in numeros.items() %}
-{ text: "{{numero}} - {{jugador}}", fillStyle:"#"+(Math.random()*0xFFFFFF<<0).toString(16) },
+"{{numero}} - {{jugador}}",
 {% endfor %}
 ]
 
 if(jugadores.length === 0){
-jugadores = [{text:"Sin jugadores"}]
+jugadores = ["Sin jugadores"]
 }
 
-let rueda = new Winwheel({
-numSegments: jugadores.length,
-outerRadius: 220,
-textFontSize: 14,
-segments: jugadores,
-animation:{
-type:"spinToStop",
-duration:6,
-spins:8,
-callbackFinished:mostrarGanador
-}
-})
+let angulo = 0
+let girando = false
 
-rueda.draw()
+function dibujarRuleta(){
+
+let total = jugadores.length
+let anguloSegmento = (2*Math.PI)/total
+
+for(let i=0;i<total;i++){
+
+let inicio = i*anguloSegmento + angulo
+let fin = inicio + anguloSegmento
+
+ctx.beginPath()
+ctx.moveTo(250,250)
+ctx.arc(250,250,240,inicio,fin)
+ctx.fillStyle = `hsl(${i*360/total},70%,50%)`
+ctx.fill()
+
+ctx.save()
+
+ctx.translate(250,250)
+ctx.rotate(inicio + anguloSegmento/2)
+
+ctx.fillStyle="white"
+ctx.font="14px Arial"
+ctx.fillText(jugadores[i],120,5)
+
+ctx.restore()
+
+}
+
+}
+
+function dibujarPuntero(){
+
+ctx.fillStyle="white"
+
+ctx.beginPath()
+ctx.moveTo(250,10)
+ctx.lineTo(230,40)
+ctx.lineTo(270,40)
+ctx.fill()
+
+}
+
+function render(){
+
+ctx.clearRect(0,0,500,500)
+
+dibujarRuleta()
+dibujarPuntero()
+
+requestAnimationFrame(render)
+
+}
+
+render()
 
 function girar(){
 
-if(jugadores.length === 0){
-alert("No hay jugadores")
-return
+if(girando) return
+
+girando=true
+
+let velocidad = Math.random()*0.3 + 0.35
+let friccion = 0.991
+
+let animacion = setInterval(()=>{
+
+angulo += velocidad
+velocidad *= friccion
+
+if(velocidad < 0.002){
+
+clearInterval(animacion)
+girando=false
+calcularGanador()
+
 }
 
-rueda.stopAnimation(false)
-rueda.rotationAngle = 0
-rueda.draw()
-
-rueda.startAnimation()
+},16)
 
 }
 
-function mostrarGanador(segmento){
+function calcularGanador(){
+
+let total = jugadores.length
+let anguloSegmento = (2*Math.PI)/total
+
+let indice = Math.floor(total - (angulo%(2*Math.PI))/anguloSegmento) % total
+
+let ganador = jugadores[indice]
 
 document.getElementById("resultado").innerHTML =
-"🏆 GANADOR: " + segmento.text
+"🏆 GANADOR: " + ganador
 
 confetti({
 particleCount:200,
