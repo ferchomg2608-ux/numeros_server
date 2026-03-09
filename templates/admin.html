@@ -131,8 +131,15 @@ callbackFinished:mostrarGanador
 
 function girar(){
 
+if(jugadores.length === 0){
+alert("No hay jugadores")
+return
+}
+
 rueda.stopAnimation(false)
 rueda.rotationAngle = 0
+rueda.draw()
+
 rueda.startAnimation()
 
 }
