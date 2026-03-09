@@ -7,6 +7,28 @@
 
 <style>
 
+/* PROGRESO */
+
+#progreso-box{
+margin:15px 0;
+color:white;
+text-shadow:2px 2px 4px black;
+}
+
+#barra{
+width:100%;
+height:20px;
+background:rgba(255,255,255,0.4);
+border-radius:10px;
+overflow:hidden;
+}
+
+#barra-progreso{
+height:100%;
+background:linear-gradient(90deg,#00ff6a,#00b33c);
+transition:width .5s;
+}
+
 /* BODY */
 
 body{
@@ -200,6 +222,18 @@ origin:{y:0.6}
 🎯 Números disponibles: {{ 100 - numeros|length }}
 </h3>
 
+<div id="progreso-box">
+
+<div id="progreso-texto">
+{{ numeros|length }} / 100 números vendidos
+</div>
+
+<div id="barra">
+<div id="barra-progreso" style="width: {{ numeros|length }}%;"></div>
+</div>
+
+</div>
+
 <form id="nombre-form">
 <input type="text" name="nombre" placeholder="✍️ Escribe tu nombre primero">
 </form>
@@ -279,10 +313,50 @@ forms.forEach(f=>{
         sonido.play()
     })
 })
-
 </script>
 
 {% endif %}
+
+<script>
+
+function actualizarNumeros(){
+
+fetch("/estado")
+.then(res => res.json())
+.then(data => {
+
+let vendidos = Object.keys(data).length
+
+document.getElementById("progreso-texto").innerText =
+vendidos + " / 100 números vendidos"
+
+document.getElementById("barra-progreso").style.width =
+vendidos + "%"
+
+document.querySelectorAll(".numero").forEach(btn => {
+
+let n = btn.dataset.numero
+
+if(data[n]){
+
+btn.disabled = true
+
+let tarjeta = btn.closest(".tarjeta")
+
+if(tarjeta){
+tarjeta.classList.add("tomado")
+}
+
+}
+
+})
+
+})
+
+}
+
+setInterval(actualizarNumeros, 3000)
+</script>
 
 </body>
 </html>

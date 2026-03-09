@@ -86,3 +86,9 @@ def admin():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+from flask import jsonify
+
+@app.route("/estado")
+def estado():
+    return jsonify(numeros)
