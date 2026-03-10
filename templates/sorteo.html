@@ -5,6 +5,8 @@
 
 <title>Sorteo Safari</title>
 
+<script src="https://cdn.jsdelivr.net/npm/winwheel@2.8.0/Winwheel.min.js"></script>
+
 <style>
 
 body{
@@ -14,9 +16,25 @@ font-family:Arial;
 text-align:center;
 }
 
+canvas{
+margin-top:40px;
+background:white;
+border-radius:50%;
+}
+
+button{
+margin-top:30px;
+padding:15px 30px;
+font-size:20px;
+border:none;
+border-radius:10px;
+background:gold;
+cursor:pointer;
+}
+
 #ganador{
-font-size:80px;
-margin-top:200px;
+font-size:40px;
+margin-top:30px;
 color:gold;
 }
 
@@ -28,26 +46,65 @@ color:gold;
 
 <h1>🎰 SORTEO SAFARI 🎰</h1>
 
+<canvas id="ruleta" width="500" height="500"></canvas>
+
+<br>
+
+<button onclick="girar()">Girar</button>
+
 <div id="ganador">
 Esperando ganador...
 </div>
 
 <script>
 
+let rueda
+
 fetch("/estado")
 .then(res=>res.json())
 .then(data=>{
 
-let keys = Object.keys(data)
+let segmentos = []
 
-let numero = keys[Math.floor(Math.random()*keys.length)]
+Object.entries(data).forEach(([numero,nombre])=>{
 
-let nombre = data[numero]
-
-document.getElementById("ganador").innerText =
-"🏆 "+numero+" - "+nombre
+segmentos.push({
+text: numero + " - " + nombre
+})
 
 })
+
+rueda = new Winwheel({
+
+canvasId:'ruleta',
+
+numSegments:segmentos.length,
+
+segments:segmentos,
+
+animation:{
+type:'spinToStop',
+duration:5,
+spins:8,
+callbackFinished:mostrarGanador
+}
+
+})
+
+})
+
+function girar(){
+
+rueda.startAnimation()
+
+}
+
+function mostrarGanador(segmento){
+
+document.getElementById("ganador").innerText =
+"🏆 " + segmento.text
+
+}
 
 </script>
 
