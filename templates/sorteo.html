@@ -8,10 +8,13 @@
 <script src="https://cdn.jsdelivr.net/npm/winwheel@2.8.0/Winwheel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/Tween.min.js"></script>
 
+<!-- CONFETTI -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <style>
 
 body{
-background:#0b0b0b;
+background:#0a0a0a;
 color:white;
 font-family:Arial;
 text-align:center;
@@ -27,6 +30,13 @@ background:white;
 border-radius:50%;
 }
 
+/* FLECHA */
+
+#flecha{
+font-size:50px;
+color:red;
+}
+
 button{
 margin-top:30px;
 padding:15px 40px;
@@ -36,10 +46,6 @@ border-radius:10px;
 background:gold;
 cursor:pointer;
 font-weight:bold;
-}
-
-button:hover{
-background:#ffd700;
 }
 
 #ganador{
@@ -57,6 +63,8 @@ font-weight:bold;
 
 <h1>🎰 SORTEO SAFARI 🎰</h1>
 
+<div id="flecha">▼</div>
+
 <canvas id="ruleta" width="500" height="500"></canvas>
 
 <br>
@@ -66,6 +74,9 @@ font-weight:bold;
 <div id="ganador">
 Esperando ganador...
 </div>
+
+<!-- SONIDO -->
+<audio id="sonidoRuleta" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3"></audio>
 
 <script>
 
@@ -88,10 +99,16 @@ return
 
 let segmentos = []
 
-jugadores.forEach(([numero,nombre])=>{
+let colores = [
+"#ff0000","#ff9900","#ffff00","#00ff00",
+"#00ffff","#0066ff","#9900ff","#ff00ff"
+]
+
+jugadores.forEach(([numero,nombre],i)=>{
 
 segmentos.push({
-text: numero + " - " + nombre
+text: numero + " - " + nombre,
+fillStyle: colores[i % colores.length]
 })
 
 })
@@ -129,6 +146,8 @@ return
 
 document.getElementById("ganador").innerText="Girando..."
 
+document.getElementById("sonidoRuleta").play()
+
 rueda.startAnimation()
 
 }
@@ -138,6 +157,11 @@ function mostrarGanador(segmento){
 
 document.getElementById("ganador").innerText =
 "🏆 GANADOR: " + segmento.text
+
+confetti({
+particleCount:200,
+spread:120
+})
 
 }
 
