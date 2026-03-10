@@ -19,19 +19,17 @@ ADMIN_PASSWORD = "1235"
 # -----------------------------
 
 def cargar_numeros():
-    try:
+    if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
             return json.load(f)
-    except:
-        return {}
-
+    return {}
 
 numeros = cargar_numeros()
 
 
 def guardar_numeros():
     with open(DATA_FILE, "w") as f:
-        json.dump(numeros, f)
+        json.dump(numeros, f, indent=4)
 
 
 # -----------------------------
@@ -40,10 +38,10 @@ def guardar_numeros():
 
 def guardar_ganador(numero, nombre):
 
-    try:
+    if os.path.exists(GANADORES_FILE):
         with open(GANADORES_FILE, "r") as f:
             data = json.load(f)
-    except:
+    else:
         data = []
 
     data.append({
@@ -52,16 +50,16 @@ def guardar_ganador(numero, nombre):
     })
 
     with open(GANADORES_FILE, "w") as f:
-        json.dump(data, f)
+        json.dump(data, f, indent=4)
 
 
 def cargar_ganadores():
 
-    try:
+    if os.path.exists(GANADORES_FILE):
         with open(GANADORES_FILE, "r") as f:
             return json.load(f)
-    except:
-        return []
+
+    return []
 
 
 # -----------------------------
@@ -72,25 +70,26 @@ def sorteo_automatico():
 
     global numeros
 
-    if numeros:
+    if not numeros:
+        return
 
-        numero = random.choice(list(numeros.keys()))
-        ganador = numeros[numero]
+    numero = random.choice(list(numeros.keys()))
+    ganador = numeros[numero]
 
-        print("🏆 GANADOR AUTOMATICO:", numero, ganador)
+    print("🏆 GANADOR AUTOMATICO:", numero, ganador)
 
-        guardar_ganador(numero, ganador)
+    guardar_ganador(numero, ganador)
 
 
 # -----------------------------
 # SCHEDULER
 # -----------------------------
 
-scheduler = BackgroundScheduler(daemon=True)
+scheduler = BackgroundScheduler()
 
 scheduler.add_job(
     sorteo_automatico,
-    'cron',
+    "cron",
     hour=20,
     minute=0
 )
@@ -157,6 +156,16 @@ def estado():
 
 
 # -----------------------------
+# API JUGADORES
+# -----------------------------
+
+@app.route("/jugadores")
+def jugadores():
+
+    return jsonify(numeros)
+
+
+# -----------------------------
 # PANEL ADMIN
 # -----------------------------
 
@@ -202,7 +211,7 @@ def admin():
 
 
 # -----------------------------
-# HISTORIAL
+# HISTORIAL GANADORES
 # -----------------------------
 
 @app.route("/ganadores")
@@ -231,4 +240,9 @@ def sorteo():
 # -----------------------------
 
 if __name__ == "__main__":
-    app.run()
+
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True
+    )
