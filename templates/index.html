@@ -11,6 +11,19 @@ html{
 scroll-behavior:smooth;
 }
 
+#contador-box{
+text-align:center;
+margin:20px 0;
+color:white;
+text-shadow:2px 2px 5px black;
+}
+
+#contador{
+font-size:40px;
+font-weight:bold;
+color:#ffd700;
+}
+
 /* PROGRESO */
 
 #progreso-box{
@@ -164,6 +177,14 @@ h3{
 <a href="#reglas">Reglas</a>
 <a href="#contacto">Contacto</a>
 </div>
+
+</div>
+
+<div id="contador-box">
+
+<h2>🎰 Sorteo en:</h2>
+
+<h1 id="contador">--:--:--</h1>
 
 </div>
 
@@ -322,6 +343,40 @@ forms.forEach(f=>{
 </script>
 
 {% endif %}
+
+<script>
+
+function actualizarContador(){
+
+let ahora = new Date()
+
+let objetivo = new Date()
+
+objetivo.setHours(20)
+objetivo.setMinutes(0)
+objetivo.setSeconds(0)
+
+if(ahora > objetivo){
+objetivo.setDate(objetivo.getDate()+1)
+}
+
+let diferencia = objetivo - ahora
+
+let horas = Math.floor(diferencia/1000/60/60)
+let minutos = Math.floor((diferencia/1000/60)%60)
+let segundos = Math.floor((diferencia/1000)%60)
+
+document.getElementById("contador").innerText =
+String(horas).padStart(2,"0")+":"+
+String(minutos).padStart(2,"0")+":"+
+String(segundos).padStart(2,"0")
+
+}
+
+actualizarContador()
+setInterval(actualizarContador,1000)
+
+</script>
 
 <script>
 

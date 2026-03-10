@@ -1,94 +1,206 @@
-import json
-import random
-import os
-from flask import Flask, render_template, request, redirect
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Safari de Números</title>
 
-app = Flask(__name__)
+<style>
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, "numeros.json")
+html{
+scroll-behavior:smooth;
+}
 
-ADMIN_PASSWORD = "1235"  # Cambia la contraseña si quieres
+section{
+scroll-margin-top:90px;
+}
 
+/* BODY */
 
-def cargar_numeros():
-    try:
-        with open(DATA_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return {}
+body{
+font-family: Arial, sans-serif;
+padding:20px;
+min-height:100vh;
+background-image:url("{{ url_for('static', filename='selva.png') }}");
+background-size:cover;
+background-position:center;
+}
 
+/* HEADER */
 
-numeros = cargar_numeros()
+.header{
+background:rgba(0,80,0,0.9);
+padding:12px 25px;
+border-radius:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
 
+position:sticky;
+top:0;
+z-index:1000;
+}
 
-def guardar_numeros():
-    with open(DATA_FILE, "w") as f:
-        json.dump(numeros, f)
+.logo{
+font-size:22px;
+font-weight:bold;
+color:white;
+}
 
+.menu a{
+color:white;
+text-decoration:none;
+margin-left:18px;
+font-weight:bold;
+}
 
-@app.route("/", methods=["GET"])
-def index():
-    return render_template("index.html", numeros=numeros)
+.menu a:hover{
+text-decoration:underline;
+}
 
+/* GRID */
 
-@app.route("/pick", methods=["POST"])
-def pick():
+#numeros-container{
+display:grid;
+grid-template-columns:repeat(10,1fr);
+gap:12px;
+}
 
-    numero = int(request.form["numero"])
-    nombre = request.form.get("nombre", "Jugador")
+/* TARJETAS */
 
-    if str(numero) not in numeros:
-        numeros[str(numero)] = nombre
-        guardar_numeros()
+.tarjeta{
+padding:12px;
+border-radius:16px;
+border:2px solid #2f5d2f;
+background:rgba(255,255,255,0.9);
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+font-size:18px;
+font-weight:bold;
+box-shadow:0 4px 10px rgba(0,0,0,0.3);
+transition:all .25s;
+}
 
-    return redirect("/")
+.tarjeta:hover{
+transform:scale(1.07);
+background:#e8ffe8;
+}
 
+.tomado{
+background:rgba(180,180,180,.8);
+border-color:#555;
+}
 
-@app.route("/reset", methods=["POST"])
-def reset():
+.tarjeta button{
+border:none;
+background:none;
+font-size:18px;
+cursor:pointer;
+}
 
-    password = request.form.get("password", "")
+.jugador{
+font-size:13px;
+margin-top:4px;
+}
 
-    if password == ADMIN_PASSWORD:
-        numeros.clear()
-        guardar_numeros()
+</style>
+</head>
 
-    return redirect("/")
+<body>
 
+<!-- HEADER -->
 
-# PANEL ADMIN
-@app.route("/admin", methods=["GET","POST"])
-def admin():
+<div class="header">
 
-    password = request.args.get("password","")
+<div class="logo">🦜 Safari de Números</div>
 
-    if password != ADMIN_PASSWORD:
-        return "Acceso denegado"
+<div class="menu">
+<a href="#resultados">Resultados</a>
+<a href="#premios">Premios</a>
+<a href="#reglas">Reglas</a>
+<a href="#contacto">Contacto</a>
+</div>
 
-    ganador = None
+</div>
 
-    if request.method == "POST":
+<h2>🌿 Safari de Números 🐅</h2>
 
-        if request.form.get("accion") == "ganador":
-            if numeros:
-                numero = random.choice(list(numeros.keys()))
-                ganador = (numero, numeros[numero])
+<h3>
+🎯 Números disponibles: {{ 100 - numeros|length }}
+</h3>
 
-        if request.form.get("accion") == "liberar":
-            numero = request.form.get("numero")
-            if numero in numeros:
-                del numeros[numero]
-                guardar_numeros()
+<div id="numeros-container">
 
-    return render_template("admin.html", numeros=numeros, ganador=ganador)
+{% for numero in range(1,101) %}
+{% set n = numero|string %}
 
+{% if n in numeros %}
 
-if __name__ == "__main__":
-    app.run(debug=True)
+<div class="tarjeta tomado">
+<div>{{numero}}</div>
+<div class="jugador">{{numeros[n]}}</div>
+</div>
 
-from flask import jsonify
+{% else %}
 
-@app.route("/estado")
-def estado():
-    return jsonify(numeros)
+<form method="POST" action="/pick">
+<input type="hidden" name="numero" value="{{numero}}">
+<input type="hidden" name="nombre" value="">
+<div class="tarjeta">
+<button type="submit">{{numero}}</button>
+</div>
+</form>
+
+{% endif %}
+{% endfor %}
+
+</div>
+
+<!-- RESULTADOS -->
+
+<section id="resultados">
+
+<h2>🏆 Resultados</h2>
+
+<p>Aquí aparecerán los ganadores del Safari.</p>
+
+</section>
+
+<!-- PREMIOS -->
+
+<section id="premios">
+
+<h2>🎁 Premios</h2>
+
+<p>🥇 Primer premio</p>
+<p>🥈 Segundo premio</p>
+<p>🥉 Tercer premio</p>
+
+</section>
+
+<!-- REGLAS -->
+
+<section id="reglas">
+
+<h2>📜 Reglas</h2>
+
+<p>1. Cada número solo puede ser elegido una vez.</p>
+<p>2. El ganador se elige con la ruleta.</p>
+<p>3. El administrador controla el sorteo.</p>
+
+</section>
+
+<!-- CONTACTO -->
+
+<section id="contacto">
+
+<h2>📞 Contacto</h2>
+
+<p>Email: contacto@safari.com</p>
+
+</section>
+
+</body>
+</html>
