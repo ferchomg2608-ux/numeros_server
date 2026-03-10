@@ -7,8 +7,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/winwheel@2.8.0/Winwheel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/Tween.min.js"></script>
-
-<!-- CONFETTI -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <style>
@@ -30,8 +28,6 @@ background:white;
 border-radius:50%;
 }
 
-/* FLECHA */
-
 #flecha{
 font-size:50px;
 color:red;
@@ -46,6 +42,12 @@ border-radius:10px;
 background:gold;
 cursor:pointer;
 font-weight:bold;
+}
+
+#contador{
+font-size:40px;
+margin-top:20px;
+color:#00ffcc;
 }
 
 #ganador{
@@ -63,6 +65,8 @@ font-weight:bold;
 
 <h1>🎰 SORTEO SAFARI 🎰</h1>
 
+<div id="contador">Esperando sorteo...</div>
+
 <div id="flecha">▼</div>
 
 <canvas id="ruleta" width="500" height="500"></canvas>
@@ -75,12 +79,12 @@ font-weight:bold;
 Esperando ganador...
 </div>
 
-<!-- SONIDO -->
 <audio id="sonidoRuleta" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3"></audio>
 
 <script>
 
 let rueda
+let yaGiro = false
 
 fetch("/estado")
 .then(res=>res.json())
@@ -136,13 +140,9 @@ callbackFinished:mostrarGanador
 
 })
 
-
 function girar(){
 
-if(!rueda){
-alert("No hay jugadores aún")
-return
-}
+if(!rueda) return
 
 document.getElementById("ganador").innerText="Girando..."
 
@@ -151,7 +151,6 @@ document.getElementById("sonidoRuleta").play()
 rueda.startAnimation()
 
 }
-
 
 function mostrarGanador(segmento){
 
@@ -164,6 +163,43 @@ spread:120
 })
 
 }
+
+function actualizarContador(){
+
+let ahora = new Date()
+
+let objetivo = new Date()
+
+objetivo.setHours(20)
+objetivo.setMinutes(0)
+objetivo.setSeconds(0)
+
+if(ahora > objetivo){
+objetivo.setDate(objetivo.getDate()+1)
+}
+
+let diferencia = objetivo - ahora
+
+let horas = Math.floor(diferencia/1000/60/60)
+let minutos = Math.floor((diferencia/1000/60)%60)
+let segundos = Math.floor((diferencia/1000)%60)
+
+document.getElementById("contador").innerText =
+"⏳ Sorteo en: "+
+String(horas).padStart(2,"0")+":"+
+String(minutos).padStart(2,"0")+":"+
+String(segundos).padStart(2,"0")
+
+if(horas===0 && minutos===0 && segundos===0 && !yaGiro){
+
+yaGiro = true
+girar()
+
+}
+
+}
+
+setInterval(actualizarContador,1000)
 
 </script>
 
