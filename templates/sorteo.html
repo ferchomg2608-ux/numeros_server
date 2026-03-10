@@ -58,21 +58,32 @@ Esperando ganador...
 
 <script>
 
-let rueda
+let rueda = null;
 
 fetch("/estado")
-.then(res=>res.json())
-.then(data=>{
+.then(res => res.json())
+.then(data => {
 
-let segmentos = []
+let jugadores = Object.entries(data);
 
-Object.entries(data).forEach(([numero,nombre])=>{
+if(jugadores.length === 0){
+
+document.getElementById("ganador").innerText =
+"No hay participantes aún";
+
+return;
+
+}
+
+let segmentos = [];
+
+jugadores.forEach(([numero,nombre]) => {
 
 segmentos.push({
 text: numero + " - " + nombre
 })
 
-})
+});
 
 rueda = new Winwheel({
 
@@ -89,25 +100,29 @@ spins:8,
 callbackFinished:mostrarGanador
 }
 
-})
+});
 
 })
 
 function girar(){
 
-rueda.startAnimation()
+if(!rueda){
+alert("La ruleta aún no cargó jugadores");
+return;
+}
+
+rueda.startAnimation();
 
 }
 
 function mostrarGanador(segmento){
 
 document.getElementById("ganador").innerText =
-"🏆 " + segmento.text
+"🏆 " + segmento.text;
 
 }
 
 </script>
 
 </body>
-
 </html>
