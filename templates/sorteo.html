@@ -3,60 +3,162 @@
 
 <head>
 
-<title>Test Ruleta</title>
+<title>Sorteo Safari</title>
 
 <script src="https://cdn.jsdelivr.net/npm/winwheel@2.8.0/Winwheel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+<style>
+
+body{
+background:#0a0a0a;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+canvas{
+margin-top:30px;
+background:white;
+border-radius:50%;
+}
+
+#flecha{
+font-size:50px;
+color:red;
+}
+
+button{
+margin-top:30px;
+padding:15px 40px;
+font-size:22px;
+border:none;
+border-radius:10px;
+background:gold;
+cursor:pointer;
+font-weight:bold;
+}
+
+#ganador{
+font-size:40px;
+margin-top:30px;
+color:gold;
+}
+
+</style>
 
 </head>
 
 <body>
 
-<h1>Ruleta Test</h1>
+<h1>🎰 SORTEO SAFARI 🎰</h1>
+
+<div id="flecha">▼</div>
 
 <canvas id="ruleta" width="500" height="500"></canvas>
 
-<button onclick="girar()">Girar</button>
+<br>
+
+<button id="botonGirar" onclick="girar()" disabled>Girar</button>
+
+<div id="ganador">
+Cargando jugadores...
+</div>
 
 <script>
 
-let rueda
+let rueda = null
+let jugadoresActuales = 0
 
-async function iniciar(){
+async function cargarJugadores(){
+
+try{
 
 let res = await fetch("/estado")
 let data = await res.json()
 
-console.log(data)
-
 let jugadores = Object.entries(data)
 
-let segmentos = jugadores.map(([n,nombre]) => ({
-text: n + " - " + nombre
+if(jugadores.length === 0){
+
+document.getElementById("ganador").innerText =
+"No hay jugadores aún"
+
+return
+}
+
+if(jugadores.length === jugadoresActuales){
+return
+}
+
+jugadoresActuales = jugadores.length
+
+let segmentos = jugadores.map(([numero,nombre]) => ({
+text: numero + " - " + nombre
 }))
 
 rueda = new Winwheel({
+
 canvasId:"ruleta",
+
 numSegments:segmentos.length,
+
+outerRadius:230,
+
+textFontSize:14,
+
 segments:segmentos,
+
 animation:{
 type:"spinToStop",
 duration:5,
-spins:6
+spins:8,
+callbackFinished:mostrarGanador
 }
+
 })
 
 rueda.draw()
+
+document.getElementById("botonGirar").disabled = false
+
+document.getElementById("ganador").innerText =
+"Jugadores: " + jugadoresActuales
+
+}catch(error){
+
+console.log(error)
+
+document.getElementById("ganador").innerText =
+"Error cargando jugadores"
+
+}
 
 }
 
 function girar(){
 
+if(!rueda){
+alert("La ruleta aún no carga jugadores")
+return
+}
+
+document.getElementById("ganador").innerText="Girando..."
+
 rueda.startAnimation()
 
 }
 
-iniciar()
+function mostrarGanador(segmento){
+
+document.getElementById("ganador").innerText =
+"🏆 GANADOR: " + segmento.text
+
+}
+
+cargarJugadores()
+
+setInterval(cargarJugadores,5000)
 
 </script>
 
