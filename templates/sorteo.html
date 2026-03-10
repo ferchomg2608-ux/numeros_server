@@ -74,7 +74,7 @@ async function cargarJugadores(){
 
 try{
 
-let res = await fetch("/estado")
+let res = await fetch("https://numeros-server.onrender.com/estado")
 let data = await res.json()
 
 let jugadores = Object.entries(data)
