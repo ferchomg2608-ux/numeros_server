@@ -2,3 +2,4 @@ flask
 gunicorn
 Flask
 APScheduler
+flask-cors
