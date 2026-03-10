@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>Ganadores - Safari de Números</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+padding:30px;
+min-height:100vh;
+text-align:center;
+
+background-image:url("{{ url_for('static', filename='selva.png') }}");
+background-size:cover;
+background-position:center;
+}
+
+h1{
+color:white;
+text-shadow:2px 2px 6px black;
+margin-bottom:30px;
+}
+
+.tabla{
+max-width:600px;
+margin:auto;
+background:rgba(255,255,255,0.9);
+border-radius:15px;
+padding:20px;
+box-shadow:0 5px 20px rgba(0,0,0,0.4);
+}
+
+.ganador{
+display:flex;
+justify-content:space-between;
+padding:10px;
+border-bottom:1px solid #ccc;
+font-size:18px;
+}
+
+.ganador:last-child{
+border-bottom:none;
+}
+
+.numero{
+font-weight:bold;
+color:#006600;
+}
+
+.nombre{
+font-weight:bold;
+}
+
+.vacio{
+color:white;
+font-size:20px;
+text-shadow:2px 2px 5px black;
+}
+
+.boton{
+margin-top:30px;
+display:inline-block;
+padding:12px 20px;
+background:#006600;
+color:white;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+}
+
+.boton:hover{
+background:#009933;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🏆 Historial de Ganadores</h1>
+
+{% if ganadores %}
+
+<div class="tabla">
+
+{% for g in ganadores %}
+
+<div class="ganador">
+
+<div class="numero">
+🎯 Número {{ g.numero }}
+</div>
+
+<div class="nombre">
+{{ g.nombre }}
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<p class="vacio">Aún no hay ganadores.</p>
+
+{% endif %}
+
+<a href="/" class="boton">⬅ Volver al Safari</a>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Sorteo Safari</title>
+
+<style>
+
+body{
+background:black;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+#ganador{
+font-size:80px;
+margin-top:200px;
+color:gold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🎰 SORTEO SAFARI 🎰</h1>
+
+<div id="ganador">
+Esperando ganador...
+</div>
+
+<script>
+
+fetch("/estado")
+.then(res=>res.json())
+.then(data=>{
+
+let keys = Object.keys(data)
+
+let numero = keys[Math.floor(Math.random()*keys.length)]
+
+let nombre = data[numero]
+
+document.getElementById("ganador").innerText =
+"🏆 "+numero+" - "+nombre
+
+})
+
+</script>
+
+</body>
+
+</html>

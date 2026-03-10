@@ -1,206 +1,234 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Safari de Números</title>
+import json
+import random
+import os
+from flask import Flask, render_template, request, redirect, jsonify
+from apscheduler.schedulers.background import BackgroundScheduler
 
-<style>
+app = Flask(__name__)
 
-html{
-scroll-behavior:smooth;
-}
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-section{
-scroll-margin-top:90px;
-}
+DATA_FILE = os.path.join(BASE_DIR, "numeros.json")
+GANADORES_FILE = os.path.join(BASE_DIR, "ganadores.json")
 
-/* BODY */
+ADMIN_PASSWORD = "1235"
 
-body{
-font-family: Arial, sans-serif;
-padding:20px;
-min-height:100vh;
-background-image:url("{{ url_for('static', filename='selva.png') }}");
-background-size:cover;
-background-position:center;
-}
 
-/* HEADER */
+# -----------------------------
+# CARGAR NUMEROS
+# -----------------------------
 
-.header{
-background:rgba(0,80,0,0.9);
-padding:12px 25px;
-border-radius:12px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
+def cargar_numeros():
+    try:
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return {}
 
-position:sticky;
-top:0;
-z-index:1000;
-}
 
-.logo{
-font-size:22px;
-font-weight:bold;
-color:white;
-}
+numeros = cargar_numeros()
 
-.menu a{
-color:white;
-text-decoration:none;
-margin-left:18px;
-font-weight:bold;
-}
 
-.menu a:hover{
-text-decoration:underline;
-}
+def guardar_numeros():
+    with open(DATA_FILE, "w") as f:
+        json.dump(numeros, f)
 
-/* GRID */
 
-#numeros-container{
-display:grid;
-grid-template-columns:repeat(10,1fr);
-gap:12px;
-}
+# -----------------------------
+# GANADORES
+# -----------------------------
 
-/* TARJETAS */
+def guardar_ganador(numero, nombre):
 
-.tarjeta{
-padding:12px;
-border-radius:16px;
-border:2px solid #2f5d2f;
-background:rgba(255,255,255,0.9);
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-font-size:18px;
-font-weight:bold;
-box-shadow:0 4px 10px rgba(0,0,0,0.3);
-transition:all .25s;
-}
+    try:
+        with open(GANADORES_FILE, "r") as f:
+            data = json.load(f)
+    except:
+        data = []
 
-.tarjeta:hover{
-transform:scale(1.07);
-background:#e8ffe8;
-}
+    data.append({
+        "numero": numero,
+        "nombre": nombre
+    })
 
-.tomado{
-background:rgba(180,180,180,.8);
-border-color:#555;
-}
+    with open(GANADORES_FILE, "w") as f:
+        json.dump(data, f)
 
-.tarjeta button{
-border:none;
-background:none;
-font-size:18px;
-cursor:pointer;
-}
 
-.jugador{
-font-size:13px;
-margin-top:4px;
-}
+def cargar_ganadores():
 
-</style>
-</head>
+    try:
+        with open(GANADORES_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return []
 
-<body>
 
-<!-- HEADER -->
+# -----------------------------
+# SORTEO AUTOMATICO
+# -----------------------------
 
-<div class="header">
+def sorteo_automatico():
 
-<div class="logo">🦜 Safari de Números</div>
+    global numeros
 
-<div class="menu">
-<a href="#resultados">Resultados</a>
-<a href="#premios">Premios</a>
-<a href="#reglas">Reglas</a>
-<a href="#contacto">Contacto</a>
-</div>
+    if numeros:
 
-</div>
+        numero = random.choice(list(numeros.keys()))
+        ganador = numeros[numero]
 
-<h2>🌿 Safari de Números 🐅</h2>
+        print("🏆 GANADOR AUTOMATICO:", numero, ganador)
 
-<h3>
-🎯 Números disponibles: {{ 100 - numeros|length }}
-</h3>
+        guardar_ganador(numero, ganador)
 
-<div id="numeros-container">
 
-{% for numero in range(1,101) %}
-{% set n = numero|string %}
+# -----------------------------
+# SCHEDULER
+# -----------------------------
 
-{% if n in numeros %}
+scheduler = BackgroundScheduler(daemon=True)
 
-<div class="tarjeta tomado">
-<div>{{numero}}</div>
-<div class="jugador">{{numeros[n]}}</div>
-</div>
+scheduler.add_job(
+    sorteo_automatico,
+    'cron',
+    hour=20,
+    minute=0
+)
 
-{% else %}
+scheduler.start()
 
-<form method="POST" action="/pick">
-<input type="hidden" name="numero" value="{{numero}}">
-<input type="hidden" name="nombre" value="">
-<div class="tarjeta">
-<button type="submit">{{numero}}</button>
-</div>
-</form>
 
-{% endif %}
-{% endfor %}
+# -----------------------------
+# PAGINA PRINCIPAL
+# -----------------------------
 
-</div>
+@app.route("/")
+def index():
 
-<!-- RESULTADOS -->
+    return render_template(
+        "index.html",
+        numeros=numeros
+    )
 
-<section id="resultados">
 
-<h2>🏆 Resultados</h2>
+# -----------------------------
+# ELEGIR NUMERO
+# -----------------------------
 
-<p>Aquí aparecerán los ganadores del Safari.</p>
+@app.route("/pick", methods=["POST"])
+def pick():
 
-</section>
+    numero = request.form["numero"]
+    nombre = request.form.get("nombre", "Jugador")
 
-<!-- PREMIOS -->
+    if numero not in numeros:
 
-<section id="premios">
+        numeros[numero] = nombre
+        guardar_numeros()
 
-<h2>🎁 Premios</h2>
+    return redirect("/")
 
-<p>🥇 Primer premio</p>
-<p>🥈 Segundo premio</p>
-<p>🥉 Tercer premio</p>
 
-</section>
+# -----------------------------
+# RESET ADMIN
+# -----------------------------
 
-<!-- REGLAS -->
+@app.route("/reset", methods=["POST"])
+def reset():
 
-<section id="reglas">
+    password = request.form.get("password", "")
 
-<h2>📜 Reglas</h2>
+    if password == ADMIN_PASSWORD:
 
-<p>1. Cada número solo puede ser elegido una vez.</p>
-<p>2. El ganador se elige con la ruleta.</p>
-<p>3. El administrador controla el sorteo.</p>
+        numeros.clear()
+        guardar_numeros()
 
-</section>
+    return redirect("/")
 
-<!-- CONTACTO -->
 
-<section id="contacto">
+# -----------------------------
+# ESTADO TIEMPO REAL
+# -----------------------------
 
-<h2>📞 Contacto</h2>
+@app.route("/estado")
+def estado():
 
-<p>Email: contacto@safari.com</p>
+    return jsonify(numeros)
 
-</section>
 
-</body>
-</html>
+# -----------------------------
+# PANEL ADMIN
+# -----------------------------
+
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
+
+    password = request.args.get("password", "")
+
+    if password != ADMIN_PASSWORD:
+        return "Acceso denegado"
+
+    ganador = None
+
+    if request.method == "POST":
+
+        accion = request.form.get("accion")
+
+        if accion == "ganador":
+
+            if numeros:
+
+                numero = random.choice(list(numeros.keys()))
+                nombre = numeros[numero]
+
+                ganador = (numero, nombre)
+
+                guardar_ganador(numero, nombre)
+
+        if accion == "liberar":
+
+            numero = request.form.get("numero")
+
+            if numero in numeros:
+
+                del numeros[numero]
+                guardar_numeros()
+
+    return render_template(
+        "admin.html",
+        numeros=numeros,
+        ganador=ganador
+    )
+
+
+# -----------------------------
+# HISTORIAL
+# -----------------------------
+
+@app.route("/ganadores")
+def ganadores():
+
+    data = cargar_ganadores()
+
+    return render_template(
+        "ganadores.html",
+        ganadores=data
+    )
+
+
+# -----------------------------
+# PANTALLA SORTEO
+# -----------------------------
+
+@app.route("/sorteo")
+def sorteo():
+
+    return render_template("sorteo.html")
+
+
+# -----------------------------
+# START SERVER
+# -----------------------------
+
+if __name__ == "__main__":
+    app.run()
