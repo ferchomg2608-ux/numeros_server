@@ -5,27 +5,19 @@
 
 <title>Sorteo Safari</title>
 
-<script src="https://cdn.jsdelivr.net/npm/winwheel@2.8.0/Winwheel.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
-
 <style>
 
 body{
-background:#0a0a0a;
+background:black;
 color:white;
 font-family:Arial;
 text-align:center;
 }
 
 canvas{
-margin-top:30px;
+margin-top:40px;
 background:white;
 border-radius:50%;
-}
-
-#flecha{
-font-size:50px;
-color:red;
 }
 
 button{
@@ -53,13 +45,11 @@ color:gold;
 
 <h1>🎰 SORTEO SAFARI 🎰</h1>
 
-<div id="flecha">▼</div>
-
 <canvas id="ruleta" width="500" height="500"></canvas>
 
 <br>
 
-<button id="botonGirar" onclick="girar()" disabled>Girar</button>
+<button onclick="girar()">Girar</button>
 
 <div id="ganador">
 Cargando jugadores...
@@ -67,100 +57,113 @@ Cargando jugadores...
 
 <script>
 
-let rueda = null
-let jugadoresActuales = 0
+let canvas = document.getElementById("ruleta")
+let ctx = canvas.getContext("2d")
+
+let jugadores = []
+let anguloActual = 0
+let girando = false
 
 async function cargarJugadores(){
 
-try{
-
 let res = await fetch("https://numeros-server.onrender.com/estado")
+
 let data = await res.json()
 
-let jugadores = Object.entries(data)
+jugadores = Object.entries(data)
 
 if(jugadores.length === 0){
 
 document.getElementById("ganador").innerText =
-"No hay jugadores aún"
+"No hay jugadores"
 
 return
 }
 
-if(jugadores.length === jugadoresActuales){
-return
+dibujarRuleta()
+
+document.getElementById("ganador").innerText =
+"Jugadores cargados: " + jugadores.length
+
 }
 
-jugadoresActuales = jugadores.length
+function dibujarRuleta(){
 
-let segmentos = jugadores.map(([numero,nombre]) => ({
-text: numero + " - " + nombre
-}))
+let radio = canvas.width/2
+let angulo = 2*Math.PI / jugadores.length
 
-rueda = new Winwheel({
+ctx.clearRect(0,0,canvas.width,canvas.height)
 
-canvasId:"ruleta",
+jugadores.forEach((j,i)=>{
 
-numSegments:segmentos.length,
+let inicio = angulo*i + anguloActual
+let fin = inicio + angulo
 
-outerRadius:230,
+ctx.beginPath()
+ctx.moveTo(radio,radio)
+ctx.arc(radio,radio,radio,inicio,fin)
+ctx.fillStyle = `hsl(${i*40},80%,60%)`
+ctx.fill()
+ctx.stroke()
 
-textFontSize:14,
-
-segments:segmentos,
-
-animation:{
-type:"spinToStop",
-duration:5,
-spins:8,
-callbackFinished:mostrarGanador
-}
+ctx.save()
+ctx.translate(radio,radio)
+ctx.rotate(inicio + angulo/2)
+ctx.fillStyle="black"
+ctx.font="14px Arial"
+ctx.fillText(j[0]+"-"+j[1],radio/2,5)
+ctx.restore()
 
 })
-
-rueda.draw()
-
-document.getElementById("botonGirar").disabled = false
-
-document.getElementById("ganador").innerText =
-"Jugadores: " + jugadoresActuales
-
-}catch(error){
-
-console.log(error)
-
-document.getElementById("ganador").innerText =
-"Error cargando jugadores"
-
-}
 
 }
 
 function girar(){
 
-if(!rueda){
-alert("La ruleta aún no carga jugadores")
+if(girando) return
+
+girando = true
+
+let velocidad = Math.random()*0.3 + 0.4
+let tiempo = 0
+
+function animar(){
+
+anguloActual += velocidad
+
+velocidad *= 0.99
+
+dibujarRuleta()
+
+tiempo++
+
+if(velocidad < 0.002){
+
+girando = false
+
+let angulo = 2*Math.PI / jugadores.length
+let index = Math.floor((2*Math.PI - anguloActual % (2*Math.PI)) / angulo)
+
+let ganador = jugadores[index]
+
+document.getElementById("ganador").innerText =
+"🏆 GANADOR: "+ganador[0]+" - "+ganador[1]
+
 return
 }
 
-document.getElementById("ganador").innerText="Girando..."
-
-rueda.startAnimation()
+requestAnimationFrame(animar)
 
 }
 
-function mostrarGanador(segmento){
-
-document.getElementById("ganador").innerText =
-"🏆 GANADOR: " + segmento.text
+animar()
 
 }
 
 cargarJugadores()
 
-setInterval(cargarJugadores,5000)
-
 </script>
 
 </body>
+
 </html>
