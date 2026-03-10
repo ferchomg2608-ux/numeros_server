@@ -2,9 +2,11 @@ import json
 import random
 import os
 from flask import Flask, render_template, request, redirect, jsonify
+from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
+CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
