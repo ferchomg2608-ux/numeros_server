@@ -137,7 +137,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(
     sorteo_automatico,
     "cron",
-    hour=20,
+    hour="13,15,18",
     minute=0
 )
 

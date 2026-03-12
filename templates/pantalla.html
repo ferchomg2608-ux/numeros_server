@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 
 <head>
@@ -30,6 +31,12 @@ color:gold;
 font-weight:bold;
 }
 
+#hora{
+margin-top:40px;
+font-size:40px;
+color:#ccc;
+}
+
 </style>
 
 </head>
@@ -42,19 +49,52 @@ font-weight:bold;
 Esperando ganador...
 </div>
 
+<div id="hora"></div>
+
 <script>
 
-async function cargarGanador(){
+let ultimo = ""
 
-let res = await fetch("/ganadores")
-let html = await res.text()
+async function verificarGanador(){
 
-// solo refresca la pantalla
-location.reload()
+try{
+
+let res = await fetch("/ultimo-ganador")
+let data = await res.json()
+
+if(data.numero){
+
+let texto = "🏆 GANADOR: " + data.numero + " - " + data.nombre
+
+if(texto !== ultimo){
+
+ultimo = texto
+
+document.getElementById("ganador").innerText = texto
 
 }
 
-setInterval(cargarGanador,10000)
+}
+
+}catch(e){}
+
+}
+
+function reloj(){
+
+let ahora = new Date()
+
+document.getElementById("hora").innerText =
+ahora.toLocaleTimeString()
+
+}
+
+setInterval(verificarGanador,4000)
+
+setInterval(reloj,1000)
+
+verificarGanador()
+reloj()
 
 </script>
 
