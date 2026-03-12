@@ -283,10 +283,7 @@ def admin():
 
         if accion == "ganador":
 
-            pagados = [
-    n for n,d in numeros.items()
-    if isinstance(d, dict) and d.get("pagado")
-]
+            pagados = [n for n,d in numeros.items() if d["pagado"]]
 
             if pagados:
 
@@ -309,10 +306,11 @@ def admin():
                 del numeros[numero]
                 guardar_numeros()
 
-        pagados = sum(
-    1 for n in numeros
-    if isinstance(numeros[n], dict) and numeros[n].get("pagado")
-)
+    pagados = sum(
+        1 for n in numeros
+        if isinstance(numeros[n], dict) and numeros[n].get("pagado")
+    )
+
     total = pagados * PRECIO_NUMERO
 
     return render_template(
