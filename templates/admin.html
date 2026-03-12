@@ -64,7 +64,13 @@ color:yellow;
 
 <div class="jugador">
 
-<strong>{{numero}}</strong> - {{jugador}}
+<strong>{{numero}}</strong> - {{jugador.nombre}}
+
+{% if jugador.pagado %}
+<span style="color:#2ecc71">✅ Pagado</span>
+{% else %}
+<span style="color:orange">⏳ Pendiente</span>
+{% endif %}
 
 <form method="POST" style="display:inline">
 <input type="hidden" name="accion" value="liberar">
@@ -105,7 +111,7 @@ const ctx = canvas.getContext("2d")
 
 let jugadores = [
 {% for numero, jugador in numeros.items() %}
-"{{numero}} - {{jugador}}",
+"{{numero}} - {{jugador.nombre}}",
 {% endfor %}
 ]
 

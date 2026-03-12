@@ -10,14 +10,13 @@ app = Flask(__name__)
 CORS(app)
 
 # -----------------------------
-# ARCHIVOS (COMPATIBLE CON RENDER)
+# ARCHIVOS
 # -----------------------------
 
 DATA_FILE = "/tmp/numeros.json"
 GANADORES_FILE = "/tmp/ganadores.json"
 
 ADMIN_PASSWORD = "1235"
-
 
 # -----------------------------
 # CREAR ARCHIVOS SI NO EXISTEN
@@ -31,23 +30,19 @@ if not os.path.exists(GANADORES_FILE):
     with open(GANADORES_FILE, "w") as f:
         json.dump([], f)
 
-
 # -----------------------------
-# CARGAR NUMEROS
+# NUMEROS
 # -----------------------------
 
 def cargar_numeros():
     with open(DATA_FILE, "r") as f:
         return json.load(f)
 
-
 numeros = cargar_numeros()
-
 
 def guardar_numeros():
     with open(DATA_FILE, "w") as f:
         json.dump(numeros, f, indent=4)
-
 
 # -----------------------------
 # GANADORES
@@ -70,11 +65,9 @@ def guardar_ganador(numero, nombre):
     with open(GANADORES_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-
 def cargar_ganadores():
 
     if os.path.exists(GANADORES_FILE):
-
         with open(GANADORES_FILE, "r") as f:
             return json.load(f)
 
@@ -89,11 +82,13 @@ def api_girar():
 
     global numeros
 
-    if not numeros:
-        return jsonify({"error": "no jugadores"})
+    pagados = [n for n,d in numeros.items() if d["pagado"]]
 
-    numero = random.choice(list(numeros.keys()))
-    nombre = numeros[numero]
+    if not pagados:
+        return jsonify({"error":"no pagados"})
+
+    numero = random.choice(pagados)
+    nombre = numeros[numero]["nombre"]
 
     guardar_ganador(numero, nombre)
 
@@ -105,7 +100,6 @@ def api_girar():
         "nombre": nombre
     })
 
-
 # -----------------------------
 # SORTEO AUTOMATICO
 # -----------------------------
@@ -114,11 +108,13 @@ def sorteo_automatico():
 
     global numeros
 
-    if not numeros:
+    pagados = [n for n,d in numeros.items() if d["pagado"]]
+
+    if not pagados:
         return
 
-    numero = random.choice(list(numeros.keys()))
-    nombre = numeros[numero]
+    numero = random.choice(pagados)
+    nombre = numeros[numero]["nombre"]
 
     print("🏆 GANADOR AUTOMATICO:", numero, nombre)
 
@@ -127,6 +123,30 @@ def sorteo_automatico():
     del numeros[numero]
     guardar_numeros()
 
+# -----------------------------
+# LIMPIAR NUMEROS NO PAGADOS
+# -----------------------------
+
+def limpiar_pendientes():
+
+    global numeros
+
+    ahora = datetime.now()
+    eliminar = []
+
+    for numero, data in numeros.items():
+
+        if not data["pagado"]:
+
+            hora = datetime.strptime(data["hora"], "%Y-%m-%d %H:%M:%S")
+
+            if (ahora - hora).seconds > 600:
+                eliminar.append(numero)
+
+    for n in eliminar:
+        del numeros[n]
+
+    guardar_numeros()
 
 # -----------------------------
 # SCHEDULER
@@ -141,8 +161,13 @@ scheduler.add_job(
     minute=0
 )
 
-scheduler.start()
+scheduler.add_job(
+    limpiar_pendientes,
+    "interval",
+    minutes=1
+)
 
+scheduler.start()
 
 # -----------------------------
 # PAGINA PRINCIPAL
@@ -156,7 +181,6 @@ def index():
         numeros=numeros
     )
 
-
 # -----------------------------
 # ELEGIR NUMERO
 # -----------------------------
@@ -169,11 +193,31 @@ def pick():
 
     if numero not in numeros:
 
-        numeros[numero] = nombre
+        numeros[numero] = {
+            "nombre": nombre,
+            "pagado": False,
+            "hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
         guardar_numeros()
 
     return redirect("/")
 
+# -----------------------------
+# CONFIRMAR PAGO
+# -----------------------------
+
+@app.route("/confirmar/<numero>", methods=["POST"])
+def confirmar(numero):
+
+    if numero in numeros:
+
+        numeros[numero]["pagado"] = True
+        guardar_numeros()
+
+        return {"ok": True}
+
+    return {"error": "numero no existe"}
 
 # -----------------------------
 # RESET ADMIN
@@ -191,7 +235,6 @@ def reset():
 
     return redirect("/")
 
-
 # -----------------------------
 # ESTADO TIEMPO REAL
 # -----------------------------
@@ -200,7 +243,6 @@ def reset():
 def estado():
 
     return jsonify(numeros)
-
 
 # -----------------------------
 # PANEL ADMIN
@@ -222,10 +264,12 @@ def admin():
 
         if accion == "ganador":
 
-            if numeros:
+            pagados = [n for n,d in numeros.items() if d["pagado"]]
 
-                numero = random.choice(list(numeros.keys()))
-                nombre = numeros[numero]
+            if pagados:
+
+                numero = random.choice(pagados)
+                nombre = numeros[numero]["nombre"]
 
                 ganador = (numero, nombre)
 
@@ -249,7 +293,6 @@ def admin():
         ganador=ganador
     )
 
-
 # -----------------------------
 # HISTORIAL GANADORES
 # -----------------------------
@@ -263,7 +306,6 @@ def ganadores():
         "ganadores.html",
         ganadores=reversed(data)
     )
-
 
 # -----------------------------
 # API ULTIMO GANADOR
@@ -279,7 +321,6 @@ def ultimo_ganador():
 
     return jsonify({})
 
-
 # -----------------------------
 # PANTALLA SORTEO
 # -----------------------------
@@ -289,7 +330,6 @@ def sorteo():
 
     return render_template("sorteo.html")
 
-
 # -----------------------------
 # PANTALLA GIGANTE
 # -----------------------------
@@ -298,7 +338,6 @@ def sorteo():
 def pantalla():
 
     return render_template("pantalla.html")
-
 
 # -----------------------------
 # START SERVER
