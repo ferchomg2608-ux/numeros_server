@@ -40,11 +40,22 @@ def cargar_numeros():
     with open(DATA_FILE, "r") as f:
         return json.load(f)
 
-numeros = cargar_numeros()
-
 def guardar_numeros():
     with open(DATA_FILE, "w") as f:
         json.dump(numeros, f, indent=4)
+
+numeros = cargar_numeros()
+
+# reparar datos viejos
+for n,v in list(numeros.items()):
+    if isinstance(v,str):
+        numeros[n] = {
+            "nombre": v,
+            "pagado": False,
+            "hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+guardar_numeros()
 
 # -----------------------------
 # GANADORES
@@ -113,7 +124,10 @@ def sorteo_automatico():
 
     global numeros
 
-    pagados = [n for n,d in numeros.items() if d["pagado"]]
+    pagados = [
+    n for n,d in numeros.items()
+    if isinstance(d, dict) and d.get("pagado")
+]
 
     if not pagados:
         return
@@ -269,7 +283,10 @@ def admin():
 
         if accion == "ganador":
 
-            pagados = [n for n,d in numeros.items() if d["pagado"]]
+            pagados = [
+    n for n,d in numeros.items()
+    if isinstance(d, dict) and d.get("pagado")
+]
 
             if pagados:
 
