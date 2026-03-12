@@ -84,7 +84,10 @@ def api_girar():
 
     global numeros
 
-    pagados = [n for n,d in numeros.items() if d["pagado"]]
+    pagados = [
+    n for n,d in numeros.items()
+    if isinstance(d, dict) and d.get("pagado")
+]
 
     if not pagados:
         return jsonify({"error":"no pagados"})
@@ -289,7 +292,10 @@ def admin():
                 del numeros[numero]
                 guardar_numeros()
 
-        pagados = sum(1 for n in numeros if numeros[n]["pagado"])
+        pagados = sum(
+    1 for n in numeros
+    if isinstance(numeros[n], dict) and numeros[n].get("pagado")
+)
     total = pagados * PRECIO_NUMERO
 
     return render_template(
