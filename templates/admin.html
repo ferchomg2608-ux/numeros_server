@@ -67,9 +67,10 @@ color:yellow;
 
 <div class="jugador">
 
-<strong>{{numero}}</strong> - {{jugador.nombre}}
+<strong>{{numero}}</strong> -
+{{ jugador["nombre"] if jugador is mapping else jugador }}
 
-{% if jugador.pagado %}
+{% if jugador is mapping and jugador["pagado"] %}
 <span style="color:#2ecc71">✅ Pagado</span>
 {% else %}
 <span style="color:orange">⏳ Pendiente</span>
