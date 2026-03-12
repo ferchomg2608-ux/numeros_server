@@ -70,6 +70,11 @@ color:yellow;
 <span style="color:#2ecc71">✅ Pagado</span>
 {% else %}
 <span style="color:orange">⏳ Pendiente</span>
+
+<button onclick="confirmarPago('{{numero}}')">
+💰 Confirmar pago
+</button>
+
 {% endif %}
 
 <form method="POST" style="display:inline">
@@ -105,6 +110,23 @@ color:yellow;
 </form>
 
 <script>
+
+function confirmarPago(numero){
+
+fetch("/confirmar/"+numero,{
+method:"POST"
+})
+.then(r=>r.json())
+.then(data=>{
+
+if(data.ok){
+alert("Pago confirmado")
+location.reload()
+}
+
+})
+
+}
 
 const canvas = document.getElementById("ruleta")
 const ctx = canvas.getContext("2d")
