@@ -80,6 +80,31 @@ def cargar_ganadores():
 
     return []
 
+# -----------------------------
+# API GIRAR RULETA
+# -----------------------------
+
+@app.route("/api/girar")
+def api_girar():
+
+    global numeros
+
+    if not numeros:
+        return jsonify({"error": "no jugadores"})
+
+    numero = random.choice(list(numeros.keys()))
+    nombre = numeros[numero]
+
+    guardar_ganador(numero, nombre)
+
+    del numeros[numero]
+    guardar_numeros()
+
+    return jsonify({
+        "numero": numero,
+        "nombre": nombre
+    })
+
 
 # -----------------------------
 # SORTEO AUTOMATICO

@@ -5,6 +5,8 @@
 
 <title>Sorteo Safari</title>
 
+<div style="font-size:60px">⬇️</div>
+
 <style>
 
 body{
@@ -110,57 +112,71 @@ ctx.save()
 ctx.translate(radio,radio)
 ctx.rotate(inicio + angulo/2)
 ctx.fillStyle="black"
-ctx.font="14px Arial"
-ctx.fillText(j[0]+"-"+j[1],radio/2,5)
+ctx.font="bold 13px Arial"
+ctx.fillText(j[0]+"-"+j[1],radio*0.65,5)
 ctx.restore()
 
 })
 
 }
 
-function girar(){
+async function girar(){
 
 if(girando) return
 
 girando = true
 
-let velocidad = Math.random()*0.3 + 0.4
-let tiempo = 0
+// pedir ganador al servidor
+let res = await fetch("https://numeros-server.onrender.com/api/girar")
+let data = await res.json()
 
-function animar(){
-
-anguloActual += velocidad
-
-velocidad *= 0.99
-
-dibujarRuleta()
-
-tiempo++
-
-if(velocidad < 0.002){
-
+if(data.error){
+document.getElementById("ganador").innerText = "No hay jugadores"
 girando = false
-
-let angulo = 2*Math.PI / jugadores.length
-let index = Math.floor((2*Math.PI - anguloActual % (2*Math.PI)) / angulo)
-
-let ganador = jugadores[index]
-
-document.getElementById("ganador").innerText =
-"🏆 GANADOR: "+ganador[0]+" - "+ganador[1]
-
 return
 }
 
+// encontrar posición del ganador
+let index = jugadores.findIndex(j => j[0] == data.numero)
+
+let angulo = 2*Math.PI / jugadores.length
+
+// calcular giro para que caiga en ese jugador
+let vueltas = 10
+let objetivo = (index * angulo) * -1
+
+let destino = vueltas * 2*Math.PI + objetivo
+
+let progreso = 0
+
+function animar(){
+
+progreso += 0.05
+
+anguloActual = destino * progreso
+
+dibujarRuleta()
+
+if(progreso < 1){
+
 requestAnimationFrame(animar)
+
+}else{
+
+girando = false
+
+document.getElementById("ganador").innerText =
+"🏆 GANADOR: "+data.numero+" - "+data.nombre
+
+cargarJugadores()
+
+}
 
 }
 
 animar()
 
 }
-
-cargarJugadores()
 
 </script>
 
