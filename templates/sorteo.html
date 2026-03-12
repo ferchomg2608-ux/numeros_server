@@ -1,25 +1,25 @@
 <!DOCTYPE html>
+
 <html>
 
 <head>
 
 <title>Sorteo Safari</title>
 
-<div style="font-size:60px">⬇️</div>
-
 <style>
 
 body{
-background:black;
+background:#0b0b0b;
 color:white;
 font-family:Arial;
 text-align:center;
 }
 
 canvas{
-margin-top:40px;
+margin-top:20px;
 background:white;
 border-radius:50%;
+box-shadow:0 0 30px rgba(0,0,0,0.6);
 }
 
 button{
@@ -33,10 +33,15 @@ cursor:pointer;
 font-weight:bold;
 }
 
+button:hover{
+background:orange;
+}
+
 #ganador{
 font-size:40px;
 margin-top:30px;
 color:gold;
+font-weight:bold;
 }
 
 </style>
@@ -47,15 +52,23 @@ color:gold;
 
 <h1>🎰 SORTEO SAFARI 🎰</h1>
 
-<canvas id="ruleta" width="500" height="500"></canvas>
+<div style="font-size:60px">⬇️</div>
+
+<canvas id="ruleta" width="700" height="700"></canvas>
 
 <br>
 
-<button onclick="girar()">Girar</button>
+<button onclick="girar()">Girar ruleta</button>
 
 <div id="ganador">
 Cargando jugadores...
 </div>
+
+<audio id="sonido">
+<source src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3">
+</audio>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
 
@@ -68,24 +81,31 @@ let girando = false
 
 async function cargarJugadores(){
 
-let res = await fetch("https://numeros-server.onrender.com/estado")
+try{
 
+let res = await fetch("https://numeros-server.onrender.com/estado")
 let data = await res.json()
 
 jugadores = Object.entries(data)
 
 if(jugadores.length === 0){
 
-document.getElementById("ganador").innerText =
-"No hay jugadores"
-
+document.getElementById("ganador").innerText = "No hay jugadores"
 return
+
 }
 
 dibujarRuleta()
 
 document.getElementById("ganador").innerText =
 "Jugadores cargados: " + jugadores.length
+
+}catch(e){
+
+document.getElementById("ganador").innerText =
+"Error cargando jugadores"
+
+}
 
 }
 
@@ -104,16 +124,21 @@ let fin = inicio + angulo
 ctx.beginPath()
 ctx.moveTo(radio,radio)
 ctx.arc(radio,radio,radio,inicio,fin)
-ctx.fillStyle = `hsl(${i*40},80%,60%)`
+
+ctx.fillStyle = `hsl(${i*35},80%,60%)`
 ctx.fill()
 ctx.stroke()
 
 ctx.save()
 ctx.translate(radio,radio)
 ctx.rotate(inicio + angulo/2)
+
 ctx.fillStyle="black"
-ctx.font="bold 13px Arial"
-ctx.fillText(j[0]+"-"+j[1],radio*0.65,5)
+ctx.font="bold 14px Arial"
+
+let texto = j[0]+"-"+j[1]
+ctx.fillText(texto,radio*0.55,5)
+
 ctx.restore()
 
 })
@@ -126,34 +151,46 @@ if(girando) return
 
 girando = true
 
-// pedir ganador al servidor
 let res = await fetch("https://numeros-server.onrender.com/api/girar")
 let data = await res.json()
 
 if(data.error){
+
 document.getElementById("ganador").innerText = "No hay jugadores"
+girando = false
+return
+
+}
+
+let index = jugadores.findIndex(j => j[0] == data.numero)
+
+if(index === -1){
 girando = false
 return
 }
 
-// encontrar posición del ganador
-let index = jugadores.findIndex(j => j[0] == data.numero)
-
 let angulo = 2*Math.PI / jugadores.length
 
-// calcular giro para que caiga en ese jugador
 let vueltas = 10
+
 let objetivo = (index * angulo) * -1
 
 let destino = vueltas * 2*Math.PI + objetivo
 
-let progreso = 0
+let duracion = 4000
+let inicio = null
 
-function animar(){
+function animar(tiempo){
 
-progreso += 0.05
+if(!inicio) inicio = tiempo
 
-anguloActual = destino * progreso
+let progreso = (tiempo - inicio) / duracion
+
+if(progreso > 1) progreso = 1
+
+let ease = 1 - Math.pow(1 - progreso, 3)
+
+anguloActual = destino * ease
 
 dibujarRuleta()
 
@@ -168,15 +205,31 @@ girando = false
 document.getElementById("ganador").innerText =
 "🏆 GANADOR: "+data.numero+" - "+data.nombre
 
+document.getElementById("sonido").play()
+
+confetti({
+particleCount:200,
+spread:120,
+origin:{y:0.6}
+})
+
+setTimeout(()=>{
+
 cargarJugadores()
 
-}
+},2000)
 
 }
 
-animar()
+}
+
+requestAnimationFrame(animar)
 
 }
+
+cargarJugadores()
+
+setInterval(cargarJugadores,15000)
 
 </script>
 
