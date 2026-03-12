@@ -18,7 +18,6 @@ display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
-overflow:hidden;
 }
 
 h1{
@@ -26,16 +25,16 @@ font-size:80px;
 margin-bottom:40px;
 }
 
+#contador{
+font-size:90px;
+color:#00ffcc;
+margin-bottom:40px;
+}
+
 #ganador{
 font-size:120px;
 color:gold;
 font-weight:bold;
-transition:all 0.6s ease;
-}
-
-.animacion{
-transform:scale(1.3);
-text-shadow:0 0 40px gold;
 }
 
 #hora{
@@ -51,6 +50,10 @@ color:#ccc;
 <body>
 
 <h1>🎰 SORTEO SAFARI 🎰</h1>
+
+<div id="contador">
+Calculando próximo sorteo...
+</div>
 
 <div id="ganador">
 Esperando ganador...
@@ -68,11 +71,61 @@ Esperando ganador...
 
 let ultimo = ""
 
+function proximoSorteo(){
+
+let ahora = new Date()
+
+let horarios = [13,15,18]
+
+for(let h of horarios){
+
+let objetivo = new Date()
+
+objetivo.setHours(h)
+objetivo.setMinutes(0)
+objetivo.setSeconds(0)
+
+if(objetivo > ahora){
+return objetivo
+}
+
+}
+
+let mañana = new Date()
+
+mañana.setDate(mañana.getDate()+1)
+mañana.setHours(13)
+mañana.setMinutes(0)
+mañana.setSeconds(0)
+
+return mañana
+
+}
+
+function actualizarContador(){
+
+let objetivo = proximoSorteo()
+
+let ahora = new Date()
+
+let diff = objetivo - ahora
+
+let horas = Math.floor(diff/1000/60/60)
+let minutos = Math.floor(diff/1000/60)%60
+let segundos = Math.floor(diff/1000)%60
+
+document.getElementById("contador").innerText =
+"⏳ Próximo sorteo en\n"+
+horas.toString().padStart(2,"0")+":"+
+minutos.toString().padStart(2,"0")+":"+
+segundos.toString().padStart(2,"0")
+
+}
+
 async function verificarGanador(){
 
-try{
-
 let res = await fetch("/ultimo-ganador")
+
 let data = await res.json()
 
 if(data.numero){
@@ -87,8 +140,6 @@ let div = document.getElementById("ganador")
 
 div.innerText = texto
 
-div.classList.add("animacion")
-
 document.getElementById("sonido").play()
 
 confetti({
@@ -97,15 +148,9 @@ spread:150,
 origin:{y:0.6}
 })
 
-setTimeout(()=>{
-div.classList.remove("animacion")
-},2000)
-
 }
 
 }
-
-}catch(e){}
 
 }
 
@@ -118,12 +163,15 @@ ahora.toLocaleTimeString()
 
 }
 
-setInterval(verificarGanador,4000)
+setInterval(actualizarContador,1000)
 
 setInterval(reloj,1000)
 
-verificarGanador()
+setInterval(verificarGanador,4000)
+
+actualizarContador()
 reloj()
+verificarGanador()
 
 </script>
 
