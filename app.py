@@ -38,6 +38,8 @@ def guardar_numeros():
 # GANADORES
 # -----------------------------
 
+from datetime import datetime
+
 def guardar_ganador(numero, nombre):
 
     if os.path.exists(GANADORES_FILE):
@@ -48,7 +50,8 @@ def guardar_ganador(numero, nombre):
 
     data.append({
         "numero": numero,
-        "nombre": nombre
+        "nombre": nombre,
+        "fecha": datetime.now().strftime("%d/%m/%Y %H:%M")
     })
 
     with open(GANADORES_FILE, "w") as f:
@@ -222,9 +225,9 @@ def ganadores():
     data = cargar_ganadores()
 
     return render_template(
-        "ganadores.html",
-        ganadores=data
-    )
+    "ganadores.html",
+    ganadores=reversed(data)
+)
 
 
 # -----------------------------
