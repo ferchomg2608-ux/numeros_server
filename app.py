@@ -9,12 +9,27 @@ from apscheduler.schedulers.background import BackgroundScheduler
 app = Flask(__name__)
 CORS(app)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# -----------------------------
+# ARCHIVOS (COMPATIBLE CON RENDER)
+# -----------------------------
 
-DATA_FILE = os.path.join(BASE_DIR, "numeros.json")
-GANADORES_FILE = os.path.join(BASE_DIR, "ganadores.json")
+DATA_FILE = "/tmp/numeros.json"
+GANADORES_FILE = "/tmp/ganadores.json"
 
 ADMIN_PASSWORD = "1235"
+
+
+# -----------------------------
+# CREAR ARCHIVOS SI NO EXISTEN
+# -----------------------------
+
+if not os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "w") as f:
+        json.dump({}, f)
+
+if not os.path.exists(GANADORES_FILE):
+    with open(GANADORES_FILE, "w") as f:
+        json.dump([], f)
 
 
 # -----------------------------
@@ -22,10 +37,9 @@ ADMIN_PASSWORD = "1235"
 # -----------------------------
 
 def cargar_numeros():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r") as f:
-            return json.load(f)
-    return {}
+    with open(DATA_FILE, "r") as f:
+        return json.load(f)
+
 
 numeros = cargar_numeros()
 
@@ -41,11 +55,11 @@ def guardar_numeros():
 
 def guardar_ganador(numero, nombre):
 
+    data = []
+
     if os.path.exists(GANADORES_FILE):
         with open(GANADORES_FILE, "r") as f:
             data = json.load(f)
-    else:
-        data = []
 
     data.append({
         "numero": numero,
@@ -60,6 +74,7 @@ def guardar_ganador(numero, nombre):
 def cargar_ganadores():
 
     if os.path.exists(GANADORES_FILE):
+
         with open(GANADORES_FILE, "r") as f:
             return json.load(f)
 
@@ -84,7 +99,6 @@ def sorteo_automatico():
 
     guardar_ganador(numero, nombre)
 
-    # eliminar ganador del juego
     del numeros[numero]
     guardar_numeros()
 
@@ -224,6 +238,21 @@ def ganadores():
         "ganadores.html",
         ganadores=reversed(data)
     )
+
+
+# -----------------------------
+# API ULTIMO GANADOR
+# -----------------------------
+
+@app.route("/ultimo-ganador")
+def ultimo_ganador():
+
+    data = cargar_ganadores()
+
+    if data:
+        return jsonify(data[-1])
+
+    return jsonify({})
 
 
 # -----------------------------
