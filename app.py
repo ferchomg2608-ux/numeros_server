@@ -9,6 +9,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 app = Flask(__name__)
 CORS(app)
 
+PRECIO_NUMERO = 1
+
 # -----------------------------
 # ARCHIVOS
 # -----------------------------
@@ -287,11 +289,16 @@ def admin():
                 del numeros[numero]
                 guardar_numeros()
 
-    return render_template(
-        "admin.html",
-        numeros=numeros,
-        ganador=ganador
-    )
+    pagados = sum(1 for n in numeros if numeros[n]["pagado"])
+total = pagados * PRECIO_NUMERO
+
+return render_template(
+    "admin.html",
+    numeros=numeros,
+    ganador=ganador,
+    pagados=pagados,
+    total=total
+)
 
 # -----------------------------
 # HISTORIAL GANADORES

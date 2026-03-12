@@ -56,6 +56,9 @@ color:yellow;
 
 <h1>🎮 Panel Administrador</h1>
 
+<h2>💰 Total recaudado: ${{total}}</h2>
+<h3>🎟 Números pagados: {{pagados}}</h3>
+
 <h2>Jugadores</h2>
 
 <div>
@@ -200,11 +203,22 @@ requestAnimationFrame(render)
 
 render()
 
-function girar(){
+async function girar(){
 
 if(girando) return
 
 girando=true
+
+let res = await fetch("/api/girar")
+let data = await res.json()
+
+if(data.error){
+alert("No hay jugadores pagados")
+girando=false
+return
+}
+
+let ganador = data.numero + " - " + data.nombre
 
 let velocidad = Math.random()*0.3 + 0.35
 let friccion = 0.991
@@ -218,7 +232,15 @@ if(velocidad < 0.002){
 
 clearInterval(animacion)
 girando=false
-calcularGanador()
+
+document.getElementById("resultado").innerHTML =
+"🏆 GANADOR: " + ganador
+
+confetti({
+particleCount:200,
+spread:120,
+origin:{y:0.6}
+})
 
 }
 
