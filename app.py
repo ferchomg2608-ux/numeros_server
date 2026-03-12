@@ -1,6 +1,7 @@
 import json
 import random
 import os
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -37,8 +38,6 @@ def guardar_numeros():
 # -----------------------------
 # GANADORES
 # -----------------------------
-
-from datetime import datetime
 
 def guardar_ganador(numero, nombre):
 
@@ -79,11 +78,15 @@ def sorteo_automatico():
         return
 
     numero = random.choice(list(numeros.keys()))
-    ganador = numeros[numero]
+    nombre = numeros[numero]
 
-    print("🏆 GANADOR AUTOMATICO:", numero, ganador)
+    print("🏆 GANADOR AUTOMATICO:", numero, nombre)
 
-    guardar_ganador(numero, ganador)
+    guardar_ganador(numero, nombre)
+
+    # eliminar ganador del juego
+    del numeros[numero]
+    guardar_numeros()
 
 
 # -----------------------------
@@ -161,16 +164,6 @@ def estado():
 
 
 # -----------------------------
-# API JUGADORES
-# -----------------------------
-
-@app.route("/jugadores")
-def jugadores():
-
-    return jsonify(numeros)
-
-
-# -----------------------------
 # PANEL ADMIN
 # -----------------------------
 
@@ -199,6 +192,9 @@ def admin():
 
                 guardar_ganador(numero, nombre)
 
+                del numeros[numero]
+                guardar_numeros()
+
         if accion == "liberar":
 
             numero = request.form.get("numero")
@@ -225,9 +221,9 @@ def ganadores():
     data = cargar_ganadores()
 
     return render_template(
-    "ganadores.html",
-    ganadores=reversed(data)
-)
+        "ganadores.html",
+        ganadores=reversed(data)
+    )
 
 
 # -----------------------------
@@ -238,6 +234,16 @@ def ganadores():
 def sorteo():
 
     return render_template("sorteo.html")
+
+
+# -----------------------------
+# PANTALLA GIGANTE
+# -----------------------------
+
+@app.route("/pantalla")
+def pantalla():
+
+    return render_template("pantalla.html")
 
 
 # -----------------------------

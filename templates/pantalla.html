@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Pantalla Sorteo</title>
+
+<style>
+
+body{
+background:black;
+color:white;
+font-family:Arial;
+text-align:center;
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+}
+
+h1{
+font-size:80px;
+margin-bottom:40px;
+}
+
+#ganador{
+font-size:120px;
+color:gold;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🎰 SORTEO SAFARI 🎰</h1>
+
+<div id="ganador">
+Esperando ganador...
+</div>
+
+<script>
+
+async function cargarGanador(){
+
+let res = await fetch("/ganadores")
+let html = await res.text()
+
+// solo refresca la pantalla
+location.reload()
+
+}
+
+setInterval(cargarGanador,10000)
+
+</script>
+
+</body>
+
+</html>
